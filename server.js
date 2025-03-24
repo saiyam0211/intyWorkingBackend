@@ -36,7 +36,8 @@ const corsOrigins = process.env.CORS_ORIGIN ?
     'http://localhost:5173', 
     'http://127.0.0.1:3000',
     'http://127.0.0.1:5173',
-    'https://inty-frontend.vercel.app'
+    'https://inty-frontend.vercel.app',
+    'https://inty-main.vercel.app'
   ];
 
 console.log('CORS origins:', corsOrigins);
