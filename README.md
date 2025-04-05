@@ -49,7 +49,7 @@ Make sure to set the following environment variables in your deployment platform
 - `CLOUDINARY_API_SECRET`: Cloudinary API secret
 - `RAZORPAY_KEY_ID`: Razorpay key ID
 - `RAZORPAY_KEY_SECRET`: Razorpay key secret
-- `CORS_ORIGIN`: Comma-separated list of allowed origins (e.g., `https://inty-frontend.vercel.app,http://localhost:3000`)
+- `CORS_ORIGIN`: Comma-separated list of allowed origins (e.g., `https://inty-frontend.vercel.app,https://inty-backend.onrender.com`)
 - `EMAIL_USER`: Email username for sending emails
 - `EMAIL_PASS`: Email password or app password
 - `ADMIN_EMAILS`: Comma-separated list of admin email addresses
@@ -67,7 +67,7 @@ Make sure to set the following environment variables in your deployment platform
    ```
    npm run dev
    ```
-5. The API will be available at `http://localhost:3000`
+5. The API will be available at `https://inty-backend.onrender.com`
 
 ## API Routes
 
