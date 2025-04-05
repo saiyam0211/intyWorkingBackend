@@ -17,7 +17,11 @@ router.get('/', async (req, res) => {
     // Only show listed designers by default (for public access)
     // Admin can see all designers by using showAll query parameter
     if (showAll !== 'true') {
-      filter.show = { $ne: false };
+      // Check both show and isListed fields - either can make a designer unlisted
+      filter.$and = [
+        { $or: [{ show: { $ne: false } }, { show: { $exists: false } }] },
+        { $or: [{ isListed: { $ne: false } }, { isListed: { $exists: false } }] }
+      ];
     }
     
     if (rating) {
@@ -106,6 +110,8 @@ router.post('/', async (req, res) => {
       name,
       rate,
       location,
+      latitude,
+      longitude,
       experience,
       projectsCompleted,
       description,
@@ -114,7 +120,8 @@ router.post('/', async (req, res) => {
       portfolio,
       googleReviews,
       rating,
-      show = true, // Default to listed status
+      show = false, // Default to unlisted status
+      isListed = false, // Default to unlisted status
       order // Optional custom order
     } = req.body;
     
@@ -148,6 +155,8 @@ router.post('/', async (req, res) => {
       rate,
       rateNumeric,
       location,
+      latitude,
+      longitude,
       experience,
       projectsCompleted,
       description,
@@ -157,12 +166,17 @@ router.post('/', async (req, res) => {
       googleReviews,
       rating,
       show,
+      isListed,
       order: designerOrder
     });
     
     const designer = await newDesigner.save();
     
-    res.status(201).json(designer);
+    res.status(201).json({
+      success: true,
+      message: 'Designer created successfully. Your profile will be reviewed by an admin before being listed.',
+      designer: designer
+    });
   } catch (err) {
     console.error('Error creating designer:', err.message);
     if (err.name === 'ValidationError') {
@@ -188,6 +202,8 @@ router.put('/:id', async (req, res) => {
       name,
       rate,
       location,
+      latitude,
+      longitude,
       experience,
       projectsCompleted,
       description,
@@ -197,6 +213,7 @@ router.put('/:id', async (req, res) => {
       googleReviews,
       rating,
       show,
+      isListed,
       order
     } = req.body;
     
@@ -214,70 +231,64 @@ router.put('/:id', async (req, res) => {
       rateNumeric = parseInt(rateMatch[0], 10);
     }
     
-    // Handle order reordering if a new order is provided
+    // Handle order reordering if a new order is provided and it's different
     let designerOrder = currentDesigner.order;
     if (order !== undefined && order !== currentDesigner.order) {
-      // Adjust orders of other designers
+      designerOrder = order;
+      
+      // Adjust other designers' orders as needed
       if (order > currentDesigner.order) {
-        // Moving down the list
+        // Moving down in the list
         await Designer.updateMany(
           { 
-            order: { 
-              $gt: currentDesigner.order, 
-              $lte: order 
-            },
-            _id: { $ne: req.params.id }
+            order: { $gt: currentDesigner.order, $lte: order },
+            _id: { $ne: currentDesigner._id }
           },
           { $inc: { order: -1 } }
         );
       } else {
-        // Moving up the list
+        // Moving up in the list
         await Designer.updateMany(
           { 
-            order: { 
-              $lt: currentDesigner.order, 
-              $gte: order 
-            },
-            _id: { $ne: req.params.id }
+            order: { $gte: order, $lt: currentDesigner.order },
+            _id: { $ne: currentDesigner._id }
           },
           { $inc: { order: 1 } }
         );
       }
-      
-      designerOrder = order;
     }
     
-    // Build designer object
-    const designerFields = {
-      name,
-      rate,
-      rateNumeric,
-      location,
-      experience,
-      projectsCompleted,
-      description,
-      phoneNumber,
-      email,
-      portfolio,
-      googleReviews,
-      rating,
-      order: designerOrder,
+    // Prepare the update object
+    const designerUpdate = {
+      // Only include fields that are provided in the request
+      ...(name !== undefined && { name }),
+      ...(rate !== undefined && { rate }),
+      ...(rateMatch && { rateNumeric }),
+      ...(location !== undefined && { location }),
+      ...(latitude !== undefined && { latitude }),
+      ...(longitude !== undefined && { longitude }),
+      ...(experience !== undefined && { experience }),
+      ...(projectsCompleted !== undefined && { projectsCompleted }),
+      ...(description !== undefined && { description }),
+      ...(phoneNumber !== undefined && { phoneNumber }),
+      ...(email !== undefined && { email }),
+      ...(portfolio !== undefined && { portfolio }),
+      ...(googleReviews !== undefined && { googleReviews }),
+      ...(rating !== undefined && { rating }),
+      ...(show !== undefined && { show }),
+      ...(isListed !== undefined && { isListed }),
+      ...(designerOrder !== currentDesigner.order && { order: designerOrder }),
       updatedAt: Date.now()
     };
     
-    // Only include show field if it's provided
-    if (show !== undefined) {
-      designerFields.show = show;
-    }
-    
-    // Update designer
-    const designer = await Designer.findByIdAndUpdate(
+    // Update the designer
+    const updatedDesigner = await Designer.findByIdAndUpdate(
       req.params.id,
-      { $set: designerFields },
-      { new: true, runValidators: true }
+      { $set: designerUpdate },
+      { new: true }
     );
     
-    res.json(designer);
+    res.json(updatedDesigner);
   } catch (err) {
     console.error('Error updating designer:', err.message);
     if (err.name === 'ValidationError') {

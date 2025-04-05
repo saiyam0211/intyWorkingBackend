@@ -236,7 +236,10 @@ const createCompany = async (req, res) => {
           : (req.body.specificNeighborhoods ? req.body.specificNeighborhoods.split(',').map(n => n.trim()) : []),
 
         // Initialize bannerImages as an empty array
-        bannerImages: []
+        bannerImages: [],
+
+        // Set all newly created companies as unlisted by default until admin review
+        show: false
       };
 
       // Extract banner images from request

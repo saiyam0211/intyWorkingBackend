@@ -17,7 +17,11 @@ router.get('/', async (req, res) => {
     // Only show listed craftsmen by default (for public access)
     // Admin can see all craftsmen by using showAll query parameter
     if (showAll !== 'true') {
-      filter.show = { $ne: false };
+      // Check both show and isListed fields - either can make a craftsman unlisted
+      filter.$and = [
+        { $or: [{ show: { $ne: false } }, { show: { $exists: false } }] },
+        { $or: [{ isListed: { $ne: false } }, { isListed: { $exists: false } }] }
+      ];
     }
     
     if (category) {
@@ -107,16 +111,20 @@ router.post('/', async (req, res) => {
       name,
       rate,
       location,
+      latitude,
+      longitude,
       category,
       experience,
       projectsCompleted,
+      specialty,
       description,
       phoneNumber,
       email,
       portfolio,
       googleReviews,
       rating,
-      show = true, // Default to listed status
+      show = false, // Default to unlisted status until admin review
+      isListed = false, // Default to unlisted status
       order // Optional custom order
     } = req.body;
     
@@ -150,24 +158,32 @@ router.post('/', async (req, res) => {
       rate,
       rateNumeric,
       location,
+      latitude,
+      longitude,
       category,
       experience,
       projectsCompleted,
+      specialty,
       description,
       phoneNumber,
       email,
       portfolio,
       googleReviews,
       rating,
-      show,
+      show: false, // Ensure unlisted status
+      isListed: false, // Ensure unlisted status
       order: craftsmanOrder
     });
     
     const craftsman = await newCraftsman.save();
     
-    res.status(201).json(craftsman);
+    res.status(201).json({
+      success: true,
+      message: 'Craftsman created successfully. Your profile will be reviewed by our team before appearing on the site.',
+      craftsman
+    });
   } catch (err) {
-    console.error('Error creating craftsman:', err.message);
+    console.error('Error creating craftsman:', err);
     if (err.name === 'ValidationError') {
       // Extract and return validation errors
       const errors = Object.values(err.errors).map(error => error.message);
@@ -191,9 +207,12 @@ router.put('/:id', async (req, res) => {
       name,
       rate,
       location,
+      latitude,
+      longitude,
       category,
       experience,
       projectsCompleted,
+      specialty,
       description,
       phoneNumber,
       email,
@@ -201,6 +220,7 @@ router.put('/:id', async (req, res) => {
       googleReviews,
       rating,
       show,
+      isListed,
       order
     } = req.body;
     
@@ -218,71 +238,66 @@ router.put('/:id', async (req, res) => {
       rateNumeric = parseInt(rateMatch[0], 10);
     }
     
-    // Handle order reordering if a new order is provided
+    // Handle order reordering if a new order is provided and it's different
     let craftsmanOrder = currentCraftsman.order;
     if (order !== undefined && order !== currentCraftsman.order) {
-      // Adjust orders of other craftsmen
+      craftsmanOrder = order;
+      
+      // Adjust other craftsmen's orders as needed
       if (order > currentCraftsman.order) {
-        // Moving down the list
+        // Moving down in the list
         await Craftsman.updateMany(
           { 
-            order: { 
-              $gt: currentCraftsman.order, 
-              $lte: order 
-            },
-            _id: { $ne: req.params.id }
+            order: { $gt: currentCraftsman.order, $lte: order },
+            _id: { $ne: currentCraftsman._id }
           },
           { $inc: { order: -1 } }
         );
       } else {
-        // Moving up the list
+        // Moving up in the list
         await Craftsman.updateMany(
           { 
-            order: { 
-              $lt: currentCraftsman.order, 
-              $gte: order 
-            },
-            _id: { $ne: req.params.id }
+            order: { $gte: order, $lt: currentCraftsman.order },
+            _id: { $ne: currentCraftsman._id }
           },
           { $inc: { order: 1 } }
         );
       }
-      
-      craftsmanOrder = order;
     }
     
-    // Build craftsman object
-    const craftsmanFields = {
-      name,
-      rate,
-      rateNumeric,
-      location,
-      category,
-      experience,
-      projectsCompleted,
-      description,
-      phoneNumber,
-      email,
-      portfolio,
-      googleReviews,
-      rating,
-      order: craftsmanOrder,
+    // Prepare the update object
+    const craftsmanUpdate = {
+      // Only include fields that are provided in the request
+      ...(name !== undefined && { name }),
+      ...(rate !== undefined && { rate }),
+      ...(rateMatch && { rateNumeric }),
+      ...(location !== undefined && { location }),
+      ...(latitude !== undefined && { latitude }),
+      ...(longitude !== undefined && { longitude }),
+      ...(category !== undefined && { category }),
+      ...(experience !== undefined && { experience }),
+      ...(projectsCompleted !== undefined && { projectsCompleted }),
+      ...(specialty !== undefined && { specialty }),
+      ...(description !== undefined && { description }),
+      ...(phoneNumber !== undefined && { phoneNumber }),
+      ...(email !== undefined && { email }),
+      ...(portfolio !== undefined && { portfolio }),
+      ...(googleReviews !== undefined && { googleReviews }),
+      ...(rating !== undefined && { rating }),
+      ...(show !== undefined && { show }),
+      ...(isListed !== undefined && { isListed }),
+      ...(craftsmanOrder !== currentCraftsman.order && { order: craftsmanOrder }),
       updatedAt: Date.now()
     };
     
-    // Only include show field if it's provided
-    if (show !== undefined) {
-      craftsmanFields.show = show;
-    }
-    
-    // Update craftsman
-    const craftsman = await Craftsman.findByIdAndUpdate(
+    // Update the craftsman
+    const updatedCraftsman = await Craftsman.findByIdAndUpdate(
       req.params.id,
-      { $set: craftsmanFields },
-      { new: true, runValidators: true }
+      { $set: craftsmanUpdate },
+      { new: true }
     );
     
-    res.json(craftsman);
+    res.json(updatedCraftsman);
   } catch (err) {
     console.error('Error updating craftsman:', err.message);
     if (err.name === 'ValidationError') {

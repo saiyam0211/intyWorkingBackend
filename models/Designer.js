@@ -19,6 +19,14 @@ const designerSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  latitude: {
+    type: String,
+    default: ""
+  },
+  longitude: {
+    type: String,
+    default: ""
+  },
   experience: {
     type: String,
     required: true
@@ -59,6 +67,12 @@ const designerSchema = new mongoose.Schema({
   show: {
     type: Boolean,
     default: true
+  },
+  // isListed field for admin approval status
+  isListed: {
+    type: Boolean,
+    default: false, // Default to unlisted until admin approval
+    description: 'Indicates whether this designer has been approved for listing by an admin'
   },
   createdAt: {
     type: Date,

@@ -42,10 +42,20 @@ exports.getDesignerById = async (req, res) => {
 // Create a new designer
 exports.createDesigner = async (req, res) => {
   try {
-    const newDesigner = new Designer(req.body);
+    // Set new designers to be unlisted by default until reviewed by admin
+    const designerData = {
+      ...req.body,
+      show: false  // Default to unlisted
+    };
+    
+    const newDesigner = new Designer(designerData);
     const savedDesigner = await newDesigner.save();
     
-    res.status(201).json(savedDesigner);
+    res.status(201).json({
+      success: true,
+      message: 'Designer created successfully. Your listing will be reviewed by our team before appearing on the site.',
+      designer: savedDesigner
+    });
   } catch (error) {
     console.error('Error creating designer:', error);
     res.status(400).json({ 

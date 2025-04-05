@@ -21,6 +21,14 @@ const CraftsmanSchema = new mongoose.Schema({
     required: [true, 'Please provide a location'],
     trim: true,
   },
+  latitude: {
+    type: String,
+    default: ""
+  },
+  longitude: {
+    type: String,
+    default: ""
+  },
   category: {
     type: String,
     enum: ['Basic', 'Standard', 'Premium', 'Luxury'],
@@ -34,6 +42,10 @@ const CraftsmanSchema = new mongoose.Schema({
   projectsCompleted: {
     type: String,
     required: [true, 'Please provide number of completed projects'],
+    trim: true,
+  },
+  specialty: {
+    type: String,
     trim: true,
   },
   description: {
@@ -77,6 +89,12 @@ const CraftsmanSchema = new mongoose.Schema({
   show: {
     type: Boolean,
     default: true
+  },
+  // isListed field for admin approval status
+  isListed: {
+    type: Boolean,
+    default: false, // Default to unlisted until admin approval
+    description: 'Indicates whether this craftsman has been approved for listing by an admin'
   },
   createdAt: {
     type: Date,
