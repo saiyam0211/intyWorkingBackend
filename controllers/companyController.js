@@ -384,6 +384,27 @@ const updateCompany = async (req, res) => {
           : [updates.availableCities];
       }
 
+      // Handle USP field
+      if (updates.usp) {
+        updates.usp = Array.isArray(updates.usp)
+          ? updates.usp
+          : updates.usp.split(',').map(u => u.trim()).filter(Boolean);
+      }
+
+      // Handle offers field
+      if (updates.discountsOfferTimeline) {
+        updates.discountsOfferTimeline = Array.isArray(updates.discountsOfferTimeline)
+          ? updates.discountsOfferTimeline
+          : updates.discountsOfferTimeline.split(',').map(o => o.trim()).filter(Boolean);
+      }
+
+      // Handle awards field
+      if (updates.anyAwardWon) {
+        updates.anyAwardWon = Array.isArray(updates.anyAwardWon)
+          ? updates.anyAwardWon
+          : updates.anyAwardWon.split(',').map(a => a.trim()).filter(Boolean);
+      }
+
       // Handle type field - ensure it's always an array
       if (updates.type) {
         if (Array.isArray(updates.type)) {
@@ -605,11 +626,51 @@ const uploadImage = async (req, res) => {
   }
 };
 
+// Get companies by multiple IDs (batch request)
+const getCompaniesByIds = async (req, res) => {
+  try {
+    const { ids } = req.query;
+    
+    if (!ids) {
+      return res.status(400).json({
+        message: 'Missing ids parameter'
+      });
+    }
+    
+    // Split the comma-separated IDs and filter out any invalid values
+    const companyIds = ids.split(',').filter(id => id && id.trim().length > 0);
+    
+    if (companyIds.length === 0) {
+      return res.status(400).json({
+        message: 'No valid company IDs provided'
+      });
+    }
+    
+    // Fetch all requested companies in a single query
+    const companies = await Company.find({
+      _id: { $in: companyIds }
+    }).exec();
+    
+    // Return the companies
+    res.json({
+      companies,
+      count: companies.length
+    });
+  } catch (error) {
+    console.error('Error in getCompaniesByIds:', error);
+    res.status(500).json({
+      message: 'Error fetching companies',
+      error: error.message
+    });
+  }
+};
+
 module.exports = {
   getCompanies,
   createCompany,
   updateCompany,
   deleteCompany,
   getCompanyById,
-  uploadImage
+  uploadImage,
+  getCompaniesByIds
 };

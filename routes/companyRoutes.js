@@ -11,6 +11,9 @@ router.get('/test', (req, res) => {
 // Get all companies with pagination and location filtering
 router.get('/', companyController.getCompanies);
 
+// Get companies by batch (multiple IDs)
+router.get('/batch', companyController.getCompaniesByIds);
+
 // Get Company with a particular Id
 router.get('/getCompany/:id', companyController.getCompanyById);
 
