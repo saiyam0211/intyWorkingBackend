@@ -238,8 +238,8 @@ const createCompany = async (req, res) => {
         // Initialize bannerImages as an empty array
         bannerImages: [],
 
-        // Set all newly created companies as unlisted by default until admin review
-        show: false
+        // Set all newly created companies as listed by default
+        show: true
       };
 
       // Extract banner images from request
