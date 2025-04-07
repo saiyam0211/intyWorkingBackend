@@ -69,7 +69,7 @@ const getCompanies = async (req, res) => {
     if (type) {
       console.log("Filtering by type:", type);
       console.log("Type filter query:", { type });
-      query.type = { $regex: new RegExp('^' + type + '$', 'i') };
+      query.type = type; // This will match if the array contains this value
     }
 
     // Apply other search filters
@@ -196,8 +196,9 @@ const createCompany = async (req, res) => {
         designation: req.body.designation || '',
         phoneNumber: req.body.phoneNumber || '',
         minMaxBudget: req.body.minMaxBudget || '',
-        type: Array.isArray(req.body.type) ? req.body.type : 
-              (req.body.type ? [req.body.type] : []),
+        type: Array.isArray(req.body.type) 
+              ? (req.body.type.includes("Residential") ? req.body.type : [...req.body.type, "Residential"])
+              : (req.body.type ? [req.body.type, "Residential"] : ["Residential"]),
         discountsOfferTimeline: req.body.discountsOfferTimeline || '',
         numberOfProjectsCompleted: req.body.numberOfProjectsCompleted || '',
         contactEmail: req.body.contactEmail || '',
