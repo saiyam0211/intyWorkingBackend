@@ -21,6 +21,11 @@ const CraftsmanSchema = new mongoose.Schema({
     required: [true, 'Please provide a location'],
     trim: true,
   },
+  availableCities: {
+    type: [String],
+    default: [],
+    description: 'List of cities where the craftsman provides services'
+  },
   latitude: {
     type: String,
     default: ""

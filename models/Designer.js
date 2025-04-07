@@ -19,6 +19,11 @@ const designerSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  availableCities: {
+    type: [String],
+    default: [],
+    description: 'List of cities where the designer provides services'
+  },
   latitude: {
     type: String,
     default: ""

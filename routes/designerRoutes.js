@@ -30,8 +30,11 @@ router.get('/', async (req, res) => {
     }
     
     if (location) {
-      // Case-insensitive location search
-      filter.location = { $regex: location, $options: 'i' };
+      // Case-insensitive location search that checks both location field and availableCities array
+      filter.$or = [
+        { location: { $regex: location, $options: 'i' } },
+        { availableCities: { $elemMatch: { $regex: location, $options: 'i' } } }
+      ];
     }
     
     // Handle rate filtering
@@ -155,6 +158,7 @@ router.post('/', async (req, res) => {
       rate,
       rateNumeric,
       location,
+      availableCities: req.body.availableCities || [location],
       latitude,
       longitude,
       experience,
@@ -265,6 +269,7 @@ router.put('/:id', async (req, res) => {
       ...(rate !== undefined && { rate }),
       ...(rateMatch && { rateNumeric }),
       ...(location !== undefined && { location }),
+      ...(req.body.availableCities !== undefined && { availableCities: req.body.availableCities }),
       ...(latitude !== undefined && { latitude }),
       ...(longitude !== undefined && { longitude }),
       ...(experience !== undefined && { experience }),
