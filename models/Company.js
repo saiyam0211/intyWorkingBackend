@@ -170,13 +170,11 @@ const companySchema = new mongoose.Schema({
   // New fields for search functionality
   projectType: {
     type: String,
-    enum: ["Studio", "1 BHK", "2 BHK", "3 BHK", "4 BHK", "5 BHK", "Duplex", "Penthouse", "Villa", "Commercial", "Kitchen", "Bedroom", "Bathroom", null],
     default: null
   },
   propertySizeRange: {
     type: String,
-    enum: ["400 to 600", "600 - 800", "800 - 1000", "1000 - 1200", "1200 - 1400", "1400 - 1600", "1600 - 1800", "1800 - 2000",
-      "2000 - 2400", "2400 - 2800", "2800 - 3200", "3200 - 4000", "4000 - 5000", "5000+"]
+    default: null
   },
   priceRange: {
     type: String,
