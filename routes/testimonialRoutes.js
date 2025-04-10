@@ -9,17 +9,17 @@ const {
   deleteTestimonial,
   updateTestimonialStatus 
 } = require('../controllers/testimonialController');
-const auth = require('../middleware/auth');
+const { isAdmin } = require('../middleware/authMiddleware');
 
 // Public routes
 router.get('/active', getActiveTestimonials);
 
 // Admin routes
-router.get('/', auth, getAllTestimonials);
-router.get('/:id', auth, getTestimonialById);
-router.post('/', auth, createTestimonial);
-router.put('/:id', auth, updateTestimonial);
-router.delete('/:id', auth, deleteTestimonial);
-router.patch('/:id/status', auth, updateTestimonialStatus);
+router.get('/', isAdmin, getAllTestimonials);
+router.get('/:id', isAdmin, getTestimonialById);
+router.post('/', isAdmin, createTestimonial);
+router.put('/:id', isAdmin, updateTestimonial);
+router.delete('/:id', isAdmin, deleteTestimonial);
+router.patch('/:id/status', isAdmin, updateTestimonialStatus);
 
 module.exports = router;
