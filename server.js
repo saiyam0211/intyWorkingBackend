@@ -39,10 +39,27 @@ const corsOrigins = process.env.CORS_ORIGIN ?
     'http://127.0.0.1:5173',
     'https://inty-frontend.vercel.app',
     'https://inty-main.vercel.app',
-    'https://www.inty.in'
+    'https://www.inty.in',
+    'https://inty.in'
   ];
 
 console.log('CORS origins:', corsOrigins);
+
+// Pre-flight OPTIONS request handler
+app.options('*', cors({
+  origin: (origin, callback) => {
+    if (!origin || corsOrigins.indexOf(origin) !== -1 || corsOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      console.log('Origin rejected for OPTIONS:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204
+}));
 
 app.use(cors({
   origin: function(origin, callback) {
@@ -59,15 +76,16 @@ app.use(cors({
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  optionsSuccessStatus: 204
 }));
 
 // Middleware for parsing request bodies
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 
-// Debug middleware
+// Debug middleware for all requests
 app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
+  console.log(`${req.method} ${req.url} from origin: ${req.headers.origin}`);
   next();
 });
 
