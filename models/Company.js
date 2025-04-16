@@ -178,7 +178,7 @@ const companySchema = new mongoose.Schema({
   },
   priceRange: {
     type: String,
-    enum: ["1Lakh to 3Lakh", "3Lakh to 6Lakh", "6Lakh to 10Lakh", "10Lakh to 15Lakh", "15Lakh to 20Lakh",
+    enum: ["All", "1Lakh to 3Lakh", "3Lakh to 6Lakh", "6Lakh to 10Lakh", "10Lakh to 15Lakh", "15Lakh to 20Lakh",
       "20Lakh to 25Lakh", "25Lakh to 30Lakh", "30Lakh to 40Lakh", "40Lakh+"]
   },
   serviceCategories: {
