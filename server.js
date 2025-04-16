@@ -34,7 +34,7 @@ const corsOrigins = process.env.CORS_ORIGIN ?
   [
     'https://inty-backend.onrender.com',
     'http://localhost:5173', 
-    'http://localhost:3000',
+    'https://inty-backend.onrender.com',
     'http://127.0.0.1:3000',
     'http://127.0.0.1:5173',
     'https://inty-frontend.vercel.app',

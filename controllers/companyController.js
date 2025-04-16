@@ -181,13 +181,13 @@ const createCompany = async (req, res) => {
         name: req.body.name,
         projects: parseInt(req.body.projects) || 0,
         experience: parseInt(req.body.experience) || 0,
+        establishmentYear: req.body.experience || 0,
         branches: parseInt(req.body.branches) || 0,
 
         // New fields from form
         registeredCompanyName: req.body.registeredCompanyName || '',
         nameDisplay: req.body.nameDisplay || '',
         description: req.body.description || '',
-        ageOfCompany: req.body.ageOfCompany || '',
         availableCities: Array.isArray(req.body.availableCities)
           ? req.body.availableCities
           : (req.body.availableCities ? [req.body.availableCities] : []),
@@ -201,13 +201,15 @@ const createCompany = async (req, res) => {
               : (req.body.type ? [req.body.type, "Residential"] : ["Residential"]),
         discountsOfferTimeline: req.body.discountsOfferTimeline || '',
         numberOfProjectsCompleted: req.body.numberOfProjectsCompleted || '',
+        usp: req.body.usp || '',
         contactEmail: req.body.contactEmail || '',
         googleRating: req.body.googleRating || '',
-        googleReviews: req.body.googleReviews || '',
+        googleReviewCount: req.body.googleReviewCount || '',
         anyAwardWon: req.body.anyAwardWon || '',
-        usp: req.body.usp || '',
         categoryType: req.body.categoryType || '',
-        paymentType: req.body.paymentType || '',
+        paymentType: Array.isArray(req.body.paymentType)
+          ? req.body.paymentType
+          : (req.body.paymentType ? [req.body.paymentType] : []),
         assured: req.body.assured || '',
         latitude: req.body.latitude || '',
         longitude: req.body.longitude || '',
@@ -353,6 +355,11 @@ const updateCompany = async (req, res) => {
       // Create update object from request body
       const updates = { ...req.body };
 
+      // Store the establishment year explicitly
+      if (updates.experience) {
+        updates.establishmentYear = updates.experience;
+      }
+
       // Process price ranges to calculate averages
       if (updates.basicPriceRange) {
         // Store original range before processing
@@ -376,6 +383,12 @@ const updateCompany = async (req, res) => {
       if (updates.projects) updates.projects = parseInt(updates.projects);
       if (updates.experience) updates.experience = parseInt(updates.experience);
       if (updates.branches) updates.branches = parseInt(updates.branches);
+      if (updates.googleReviewCount) updates.googleReviewCount = parseInt(updates.googleReviewCount) || 0;
+
+      // Remove ageOfCompany if present
+      if (updates.ageOfCompany) {
+        delete updates.ageOfCompany;
+      }
 
       // Handle array fields
       if (updates.availableCities) {
