@@ -207,9 +207,7 @@ const createCompany = async (req, res) => {
         googleReviewCount: req.body.googleReviewCount || '',
         anyAwardWon: req.body.anyAwardWon || '',
         categoryType: req.body.categoryType || '',
-        paymentType: Array.isArray(req.body.paymentType)
-          ? req.body.paymentType
-          : (req.body.paymentType ? [req.body.paymentType] : []),
+        paymentType: req.body.paymentType || "",
         assured: req.body.assured || '',
         latitude: req.body.latitude || '',
         longitude: req.body.longitude || '',
@@ -397,25 +395,25 @@ const updateCompany = async (req, res) => {
           : [updates.availableCities];
       }
 
-      // Handle USP field
+      // Handle usp field
       if (updates.usp) {
         updates.usp = Array.isArray(updates.usp)
-          ? updates.usp
-          : updates.usp.split(',').map(u => u.trim()).filter(Boolean);
+          ? updates.usp.join(',')
+          : updates.usp;
       }
 
       // Handle offers field
       if (updates.discountsOfferTimeline) {
         updates.discountsOfferTimeline = Array.isArray(updates.discountsOfferTimeline)
-          ? updates.discountsOfferTimeline
-          : updates.discountsOfferTimeline.split(',').map(o => o.trim()).filter(Boolean);
+          ? updates.discountsOfferTimeline.join(',')
+          : updates.discountsOfferTimeline;
       }
 
       // Handle awards field
       if (updates.anyAwardWon) {
         updates.anyAwardWon = Array.isArray(updates.anyAwardWon)
-          ? updates.anyAwardWon
-          : updates.anyAwardWon.split(',').map(a => a.trim()).filter(Boolean);
+          ? updates.anyAwardWon.join(',')
+          : updates.anyAwardWon;
       }
 
       // Handle type field - ensure it's always an array
@@ -535,9 +533,6 @@ const updateCompany = async (req, res) => {
       }
 
       // Ensure other fields are properly handled
-      if (updates.usp) {
-        updates.usp = updates.usp.toString().trim();
-      }
       
       // Update the company in the database
       const company = await Company.findByIdAndUpdate(

@@ -1,0 +1,1 @@
+const fs = require("fs"); const content = fs.readFileSync("companyController.js", "utf8"); const updatedContent = content.replace(/paymentType: req.body.paymentType \|\| "",,/, "paymentType: req.body.paymentType || ,"); fs.writeFileSync("companyController.js", updatedContent);
