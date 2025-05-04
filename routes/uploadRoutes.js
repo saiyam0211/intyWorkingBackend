@@ -111,4 +111,52 @@ router.post('/multiple', setCategoryMiddleware, upload.array('files', 10), async
   }
 });
 
+// @route   POST api/upload/craftsman-portfolio
+// @desc    Upload craftsman portfolio images to Cloudinary
+// @access  Private
+router.post('/craftsman-portfolio', upload.single('file'), (req, res, next) => {
+  // Set portfolio category
+  req.fileCategory = 'craftsman-portfolios';
+  next();
+}, async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    return res.status(200).json({
+      url: req.file.path,
+      public_id: req.file.filename,
+      message: 'Craftsman portfolio image uploaded successfully'
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    return res.status(500).json({ message: 'Error uploading file', error: error.message });
+  }
+});
+
+// @route   POST api/upload/designer-portfolio
+// @desc    Upload designer portfolio images to Cloudinary
+// @access  Private
+router.post('/designer-portfolio', upload.single('file'), (req, res, next) => {
+  // Set portfolio category
+  req.fileCategory = 'designer-portfolios';
+  next();
+}, async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No file uploaded' });
+    }
+
+    return res.status(200).json({
+      url: req.file.path,
+      public_id: req.file.filename,
+      message: 'Designer portfolio image uploaded successfully'
+    });
+  } catch (error) {
+    console.error('Upload error:', error);
+    return res.status(500).json({ message: 'Error uploading file', error: error.message });
+  }
+});
+
 module.exports = router;

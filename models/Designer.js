@@ -68,6 +68,27 @@ const designerSchema = new mongoose.Schema({
     type: String,
     default: '5'
   },
+  website: {
+    type: String,
+    trim: true
+  },
+  address: {
+    type: String,
+    trim: true
+  },
+  googleLocation: {
+    type: String,
+    trim: true
+  },
+  pincode: {
+    type: String,
+    trim: true
+  },
+  type: {
+    type: String,
+    enum: ['Company', 'Solo'],
+    default: 'Solo'
+  },
   // Add show field for list/unlist functionality
   show: {
     type: Boolean,

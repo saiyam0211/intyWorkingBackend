@@ -84,6 +84,27 @@ const CraftsmanSchema = new mongoose.Schema({
     default: '5',
     enum: ['1', '1.5', '2', '2.5', '3', '3.5', '4', '4.5', '5'],
   },
+  website: {
+    type: String,
+    trim: true
+  },
+  address: {
+    type: String,
+    trim: true
+  },
+  googleLocation: {
+    type: String,
+    trim: true
+  },
+  pincode: {
+    type: String,
+    trim: true
+  },
+  type: {
+    type: String,
+    enum: ['Company', 'Solo'],
+    default: 'Solo'
+  },
   // Add order field for custom sorting
   order: {
     type: Number,
